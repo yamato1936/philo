@@ -6,11 +6,11 @@
 /*   By: toyamagu <toyamagu@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/04 15:09:00 by toyamagu          #+#    #+#             */
-/*   Updated: 2026/03/04 15:09:00 by toyamagu         ###   ########.fr       */
+/*   Updated: 2026/03/04 21:15:00 by toyamagu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../philo.h"
+#include "philo.h"
 
 long	get_time_ms(void)
 {
@@ -25,34 +25,22 @@ long	since_start(long start_ms)
 	return (get_time_ms() - start_ms);
 }
 
-static long	get_time_us(void)
-{
-	struct timeval	tv;
-
-	gettimeofday(&tv, NULL);
-	return ((tv.tv_sec * 1000000L) + tv.tv_usec);
-}
-
 void	smart_sleep(t_sim *sim, long duration_ms)
 {
 	long	start;
-	long	elapsed;
+	long	now;
 	long	remain;
-	long	target;
 
-	start = get_time_us();
-	target = duration_ms * 1000L;
+	start = get_time_ms();
 	while (sim_is_stopped(sim) == 0)
 	{
-		elapsed = get_time_us() - start;
-		if (elapsed >= target)
+		now = get_time_ms();
+		if ((now - start) >= duration_ms)
 			break ;
-		remain = target - elapsed;
-		if (remain > 2000)
-			usleep(500);
-		else if (remain > 500)
-			usleep(100);
+		remain = duration_ms - (now - start);
+		if (remain > 10)
+			usleep(1000);
 		else
-			usleep(50);
+			usleep(200);
 	}
 }

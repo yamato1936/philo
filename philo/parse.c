@@ -6,13 +6,13 @@
 /*   By: toyamagu <toyamagu@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/04 15:06:00 by toyamagu          #+#    #+#             */
-/*   Updated: 2026/03/04 15:06:00 by toyamagu         ###   ########.fr       */
+/*   Updated: 2026/03/04 21:15:00 by toyamagu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../philo.h"
+#include "philo.h"
 
-static int	parse_positive_long(char *str, long *value)
+static int	parse_positive_int(char *str, long *value)
 {
 	int		i;
 	long	result;
@@ -38,14 +38,15 @@ static int	parse_positive_long(char *str, long *value)
 	return (0);
 }
 
-static int	assign_values(t_sim *sim, long *v)
+static int	set_values(t_sim *sim, long *values, int argc)
 {
-	sim->number = (int)v[0];
-	sim->t_die = v[1];
-	sim->t_eat = v[2];
-	sim->t_sleep = v[3];
-	if (v[4] > 0)
-		sim->must_eat = (int)v[4];
+	sim->number = (int)values[0];
+	sim->t_die = values[1];
+	sim->t_eat = values[2];
+	sim->t_sleep = values[3];
+	sim->must_eat = -1;
+	if (argc == 6)
+		sim->must_eat = (int)values[4];
 	if (sim->number <= 0)
 		return (1);
 	return (0);
@@ -58,15 +59,14 @@ int	parse_args(int argc, char **argv, t_sim *sim)
 
 	if (argc != 5 && argc != 6)
 		return (print_error("Error: invalid arguments\n"));
-	values[4] = -1;
 	i = 1;
 	while (i < argc)
 	{
-		if (parse_positive_long(argv[i], &values[i - 1]) != 0)
+		if (parse_positive_int(argv[i], &values[i - 1]) != 0)
 			return (print_error("Error: invalid arguments\n"));
 		i++;
 	}
-	if (assign_values(sim, values) != 0)
+	if (set_values(sim, values, argc) != 0)
 		return (print_error("Error: invalid arguments\n"));
 	return (0);
 }

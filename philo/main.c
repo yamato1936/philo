@@ -6,11 +6,11 @@
 /*   By: toyamagu <toyamagu@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/04 15:06:00 by toyamagu          #+#    #+#             */
-/*   Updated: 2026/03/04 15:06:00 by toyamagu         ###   ########.fr       */
+/*   Updated: 2026/03/04 21:15:00 by toyamagu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../philo.h"
+#include "philo.h"
 
 static void	init_defaults(t_sim *sim)
 {
@@ -21,6 +21,7 @@ static void	init_defaults(t_sim *sim)
 	sim->must_eat = -1;
 	sim->start_time = 0;
 	sim->stop = 0;
+	sim->started = 0;
 	sim->forks = NULL;
 	sim->philos = NULL;
 }

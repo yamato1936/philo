@@ -6,7 +6,7 @@
 /*   By: toyamagu <toyamagu@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/04 15:05:00 by toyamagu          #+#    #+#             */
-/*   Updated: 2026/03/04 15:05:00 by toyamagu         ###   ########.fr       */
+/*   Updated: 2026/03/04 21:15:00 by toyamagu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,6 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-typedef enum e_state
-{
-	ST_FORK,
-	ST_EAT,
-	ST_SLEEP,
-	ST_THINK,
-	ST_DIED
-}	t_state;
-
 typedef struct s_sim	t_sim;
 
 typedef struct s_philo
@@ -36,7 +27,6 @@ typedef struct s_philo
 	int				id;
 	int				meals;
 	int				full;
-	int				started;
 	long			last_meal;
 	pthread_t		thread;
 	pthread_mutex_t	meal_mutex;
@@ -54,23 +44,24 @@ struct s_sim
 	int				must_eat;
 	long			start_time;
 	int				stop;
+	int				started;
 	pthread_mutex_t	*forks;
 	t_philo			*philos;
 	pthread_mutex_t	print_mutex;
-	pthread_mutex_t	state_mutex;
+	pthread_mutex_t	stop_mutex;
 };
 
 int		parse_args(int argc, char **argv, t_sim *sim);
 int		init_simulation(t_sim *sim);
 int		launch_simulation(t_sim *sim);
 void	destroy_simulation(t_sim *sim);
-void	cleanup_partial_init(t_sim *sim, int fk, int ph);
 long	get_time_ms(void);
 long	since_start(long start_ms);
 void	smart_sleep(t_sim *sim, long duration_ms);
 int		sim_is_stopped(t_sim *sim);
 void	sim_set_stop(t_sim *sim);
-int		log_state(t_philo *philo, t_state state);
+int		log_state(t_philo *philo, char *msg);
+int		log_death(t_philo *philo);
 void	*philo_routine(void *arg);
 int		philo_is_full(t_philo *philo);
 int		philo_eat(t_philo *philo);

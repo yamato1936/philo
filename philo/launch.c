@@ -6,28 +6,24 @@
 /*   By: toyamagu <toyamagu@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/04 15:07:00 by toyamagu          #+#    #+#             */
-/*   Updated: 2026/03/04 15:07:00 by toyamagu         ###   ########.fr       */
+/*   Updated: 2026/03/04 21:15:00 by toyamagu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../philo.h"
+#include "philo.h"
 
 static void	set_start_time(t_sim *sim)
 {
 	int		i;
-	long	offset;
-	long	margin;
+	long	start;
 
-	margin = sim->t_die - (sim->t_eat + sim->t_sleep);
-	offset = 0;
-	if ((sim->number % 2) == 0 && margin > 0 && margin <= 5)
-		offset = 5;
-	sim->start_time = get_time_ms();
+	start = get_time_ms();
+	sim->start_time = start;
 	i = 0;
 	while (i < sim->number)
 	{
 		pthread_mutex_lock(&sim->philos[i].meal_mutex);
-		sim->philos[i].last_meal = sim->start_time + offset;
+		sim->philos[i].last_meal = start;
 		pthread_mutex_unlock(&sim->philos[i].meal_mutex);
 		i++;
 	}
@@ -43,7 +39,7 @@ static int	create_threads(t_sim *sim)
 		if (pthread_create(&sim->philos[i].thread, NULL,
 				philo_routine, &sim->philos[i]) != 0)
 			return (1);
-		sim->philos[i].started = 1;
+		sim->started++;
 		i++;
 	}
 	return (0);
@@ -54,16 +50,16 @@ static void	join_threads(t_sim *sim)
 	int	i;
 
 	i = 0;
-	while (i < sim->number)
+	while (i < sim->started)
 	{
-		if (sim->philos[i].started != 0)
-			pthread_join(sim->philos[i].thread, NULL);
+		pthread_join(sim->philos[i].thread, NULL);
 		i++;
 	}
 }
 
 int	launch_simulation(t_sim *sim)
 {
+	sim->started = 0;
 	set_start_time(sim);
 	if (create_threads(sim) != 0)
 	{

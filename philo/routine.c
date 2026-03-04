@@ -6,47 +6,36 @@
 /*   By: toyamagu <toyamagu@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/04 15:08:00 by toyamagu          #+#    #+#             */
-/*   Updated: 2026/03/04 15:08:00 by toyamagu         ###   ########.fr       */
+/*   Updated: 2026/03/04 21:15:00 by toyamagu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../philo.h"
+#include "philo.h"
 
-static void	wait_until_stop(t_philo *philo)
+static void	wait_for_stop(t_philo *philo)
 {
 	while (sim_is_stopped(philo->sim) == 0)
 		usleep(500);
 }
 
-static int	handle_single_philo(t_philo *philo)
+static int	run_single(t_philo *philo)
 {
 	if (philo->sim->number != 1)
 		return (0);
 	pthread_mutex_lock(philo->left_fork);
-	log_state(philo, ST_FORK);
-	wait_until_stop(philo);
+	log_state(philo, "has taken a fork");
+	wait_for_stop(philo);
 	pthread_mutex_unlock(philo->left_fork);
 	return (1);
 }
 
 static void	stagger_start(t_philo *philo)
 {
-	if ((philo->sim->number % 2) == 0)
-	{
-		if ((philo->id % 2) == 0)
-			usleep(1000);
-	}
-	else if ((philo->id % 2) == 0)
-		usleep(1000);
-	else
-		usleep(2000);
-	if ((philo->sim->number % 2) != 0
-		&& philo->id == philo->sim->number
-		&& philo->sim->t_eat > 250)
+	if ((philo->id % 2) == 0)
 		smart_sleep(philo->sim, philo->sim->t_eat / 2);
 }
 
-static long	get_think_time(t_philo *philo)
+static long	think_delay(t_philo *philo)
 {
 	long	spare;
 
@@ -55,24 +44,16 @@ static long	get_think_time(t_philo *philo)
 	spare = philo->sim->t_die - philo->sim->t_eat - philo->sim->t_sleep;
 	if (spare <= 0)
 		return (0);
-	if (spare <= 200)
-	{
-		if ((philo->id % 2) != 0)
-			return (5);
-		return (0);
-	}
-	if (philo->id == 1)
-		return (1);
-	return (0);
+	return (spare / 2);
 }
 
 void	*philo_routine(void *arg)
 {
 	t_philo	*philo;
-	long	think_time;
+	long	delay;
 
 	philo = (t_philo *)arg;
-	if (handle_single_philo(philo) != 0)
+	if (run_single(philo) != 0)
 		return (NULL);
 	stagger_start(philo);
 	while (sim_is_stopped(philo->sim) == 0)
@@ -81,14 +62,14 @@ void	*philo_routine(void *arg)
 			break ;
 		if (philo_is_full(philo) != 0)
 			break ;
-		if (log_state(philo, ST_SLEEP) == 0)
+		if (log_state(philo, "is sleeping") == 0)
 			break ;
 		smart_sleep(philo->sim, philo->sim->t_sleep);
-		if (log_state(philo, ST_THINK) == 0)
+		if (log_state(philo, "is thinking") == 0)
 			break ;
-		think_time = get_think_time(philo);
-		if (think_time > 0)
-			smart_sleep(philo->sim, think_time);
+		delay = think_delay(philo);
+		if (delay > 0)
+			smart_sleep(philo->sim, delay);
 	}
 	return (NULL);
 }
